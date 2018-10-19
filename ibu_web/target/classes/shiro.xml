@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="  
+           http://www.springframework.org/schema/beans  
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+           http://www.springframework.org/schema/aop  
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/context  
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!-- 使用annotation 自动注册bean,并保证@Required,@Autowired的属性被注入 -->
+	<context:component-scan base-package="com.luolong.service" />
+	<context:annotation-config/>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="shiroDbRealm" />
+		<property name="cacheManager" ref="shiroEhcacheManager" />
+		<property name="sessionManager" ref="defaultWebSessionManager"  />
+	</bean>
+
+	<bean id="shiroDbRealm" class="com.luolong.common.security.ShiroDbRealm" />
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/login.jsp" /> <!-- 没有权限或者失败后跳转的页面 -->
+		<property name="successUrl" value="/index.jsp" />
+		<property name="unauthorizedUrl" value="/pages/error/error_unauthorized.jsp" />
+
+		<property name="filterChainDefinitions">
+			<value>
+			    /bootstrap/** = anon
+				/script/** = anon
+				/jquery/** = anon
+				/js/** = anon
+				/css/** = anon
+				/website/** = anon
+				/account_*.do = anon
+				/kaptcha.jsp = anon
+				/login.do = anon
+				/index.do = anon
+				/client/** = anon
+				/servlet/** = anon
+				/services/** = anon
+				/nag.do = anon
+				/**/common-DemoPage-*.do = anon
+				/**/webService-PayInterface-acceptBill.do = anon
+				/**/portal/** = anon
+				/druid/** = authc
+				/main.do=authc
+				/left*.do=authc
+				/default*.do=authc
+				/logout = logout
+				/ibu/** = authc
+				/*.do = authc
+			</value>
+		</property>
+	</bean>
+
+	<bean id="shiroEhcacheManager" class="com.luolong.common.security.RedisCacheManager">
+	 	<property name="redisManager" ref="redisManager" />
+	</bean>
+	<bean id="redisManager" class="com.luolong.common.security.RedisManager">
+	 	  <constructor-arg index="0" type="java.lang.String" value="${redis_host}"/> 
+	 	  <constructor-arg index="1" type="int" value="${redis_port}"/> 
+	 	  <constructor-arg index="2" type="int" value="${redis_expire}"/> 
+	 	  <constructor-arg index="3" type="java.lang.String" value="${redis_password}"/>
+	 	  <constructor-arg index="4" type="int" value="${redis_maxTotal}"/>
+	 	  <constructor-arg index="5" type="int" value="${redis_maxIdle}"/>
+	 	  <constructor-arg index="6" type="long" value="${redis_maxWaitMillis}"/>
+	</bean>
+	
+	<bean id="redisSessionDAO" class="com.luolong.common.security.RedisSessionDAO">
+	 	<property name="redisManager" ref="redisManager" />
+	</bean>
+	
+	<bean id="defaultWebSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<property name="globalSessionTimeout" value="3600000" />  
+	 	<property name="sessionDAO" ref="redisSessionDAO" />
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="true"/>
+        <property name="sessionFactory" ref="simpleSessionFactory" /> 
+	</bean>
+	
+	<bean id="simpleSessionFactory" class="org.apache.shiro.session.mgt.SimpleSessionFactory"></bean>
+	
+ 
+	
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+	
+	<!-- AOP式方法级权限检查 -->
+	<!-- Enable Shiro Annotations for Spring-configured beans.  Only run after -->
+	<!-- the lifecycleBeanProcessor has run: -->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcessor">
+		 <property name="proxyTargetClass" value="true" />   
+	</bean>
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+	    <property name="securityManager" ref="securityManager"/>
+	</bean>
+	
+</beans>

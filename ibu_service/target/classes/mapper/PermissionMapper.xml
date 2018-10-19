@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luolong.dao.PermissionDao">
+    
+    <select id="queryAllPermission" resultType="com.luolong.model.Permission">
+	SELECT
+		id,
+		model_name modelName,
+		permi_desc permiDesc,
+		permi_value permiValue,
+		sort_order sortOrder,
+		page_id pageId,
+		request_url requestUrl
+	FROM t_system_permission
+    </select>
+    
+    <select id="queryUserPermission" parameterType="com.luolong.model.User" resultType="com.luolong.model.Permission">
+		SELECT
+			s.id,
+			s.model_name modelName,
+			s.permi_desc permiDesc,
+			s.permi_value permiValue,
+			s.sort_order sortOrder,
+			s.page_id pageId,
+			s.request_url requestUrl
+		FROM t_system_account_role r LEFT JOIN t_system_role_permission p ON r.role_id = p.role_id
+	     LEFT JOIN t_system_permission s ON p.permission = s.permi_value
+	    WHERE r.account_id = #{userId}
+    </select>
+    
+</mapper>

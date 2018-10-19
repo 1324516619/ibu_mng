@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 	xmlns="http://www.springframework.org/schema/beans" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<bean id="db_1" class="org.apache.commons.dbcp.BasicDataSource"
+	    destroy-method="close">
+	    <property name="driverClassName" value="${jdbc_driverClassName}" />
+	    <property name="url" value="${jdbc_url}" />
+	    <property name="username" value="${jdbc_username}" />
+	    <property name="password" value="${jdbc_password}" />
+	    <property name="minIdle" value="0" />
+	</bean>
+	
+	<bean id="db_2" class="org.apache.commons.dbcp.BasicDataSource"
+	    destroy-method="close">
+	    <property name="driverClassName" value="${jdbc_driverClassName}" />
+	    <property name="url" value="${jdbc_url}" />
+	    <property name="username" value="${jdbc_username}" />
+	    <property name="password" value="${jdbc_password}" />
+	    <property name="minIdle" value="0" />
+	</bean>
+	
+</beans>		 

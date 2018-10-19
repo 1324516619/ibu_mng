@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luolong.dao.UserDao">
+<!--设置domain类和数据库中表的字段一一对应，注意数据库字段和domain类中的字段名称不致，此处一定要！-->
+    <resultMap id="BaseResultMap" type="com.luolong.model.User">
+        <id column="USER_ID" property="userId" jdbcType="INTEGER" />
+        <result column="USER_NAME" property="userName" jdbcType="CHAR" />
+        <result column="USER_PASSWORD" property="userPassword" jdbcType="CHAR" />
+        <result column="NICK_NAME" property="nickName" jdbcType="CHAR" />
+        <result column="PHONE" property="phone" jdbcType="CHAR" />
+        <result column="CREATE_DATE" property="createDate" jdbcType="CHAR" />
+        <result column="TYPE" property="type" jdbcType="CHAR" />
+    </resultMap>
+    <!-- 查询单条记录 -->
+    <select id="selectUserById" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM t_user WHERE USER_ID = #{userId}
+    </select>
+    
+    <select id="selectUser" parameterType="com.luolong.model.User" resultMap="BaseResultMap">
+        SELECT * FROM t_user WHERE USER_NAME = #{userName}
+    </select>
+    
+    <select id="getPage" parameterType="com.luolong.util.dialect.Page" resultMap="BaseResultMap">
+        SELECT * FROM t_user
+        <where>
+       	    <if test="user.userName != null and user.userName != ''">
+		        and user_name like concat( #{user.userName},'%')
+		    </if>
+		    <if test="user.phone != null and user.phone != ''">
+		        and phone like concat( #{user.phone},'%')
+		    </if>
+		</where>
+    </select>
+    
+    <insert id="add" parameterType="com.luolong.model.User" useGeneratedKeys="true" keyProperty="userId">
+      	insert into t_user (user_name,user_password,nick_name,phone,create_date,type)
+      		values(#{userName},#{userPassword},#{nickName},#{phone},now(),#{type})
+    </insert>
+    
+    <update id="edit" parameterType="com.luolong.model.User">
+        UPDATE t_user
+		SET 
+		  <if test="userName != null and userName != '' ">
+		      user_name = #{userName},
+		  </if>
+		  <if test="userPassword != null and userPassword != '' ">
+		      user_password = #{userPassword},
+		  </if>
+		  <if test="nickName != null and nickName != '' ">
+		      nick_name = #{nickName},
+		  </if>
+		  <if test="phone != null and phone != '' ">
+		      phone = #{phone},
+		  </if>
+		  <if test="type != null and type != '' ">
+		      type = #{type},
+		  </if>
+		  create_date = now()
+		WHERE user_id = #{userId}
+    </update>
+    
+    <delete id="delUserRole" parameterType="com.luolong.model.User">
+    	delete from t_system_account_role where account_id = #{userId}
+    </delete>
+    
+    <insert id="addUserRole" parameterType="com.luolong.model.UserRole" useGeneratedKeys="true" keyProperty="accountRoleId">
+      	insert into t_system_account_role (account_id,role_id)
+      		values(#{userId},#{roleId})
+    </insert>
+    
+    <select id="getUserRoleByUser" parameterType="com.luolong.model.User" resultType="com.luolong.model.UserRole">
+    	select 
+	    	account_role_id accountRoleId,
+	    	account_id userId,
+	    	role_id	roleId
+    	from t_system_account_role where account_id = #{userId}
+    </select>
+    
+</mapper>

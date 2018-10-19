@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luolong.dao.MenuDao">
+    
+    <select id="queryAllMenu" resultType="com.luolong.model.Menu">
+	SELECT
+		menu_id menuId,
+		menu_name menuName,
+		parent_menu_id parentMenuId,
+		menu_code menuCode,
+		menu_url menuUrl,
+		icon,
+		page_id pageId,
+		admin_flag adminFlag
+	FROM t_system_menu 
+    </select>
+    
+    <select id="queryUserMenu" parameterType="com.luolong.model.User" resultType="com.luolong.model.Menu">
+		SELECT
+			DISTINCT s.menu_id menuId,
+			s.menu_name menuName,
+			s.parent_menu_id parentMenuId,
+			s.menu_code menuCode,
+			s.menu_url menuUrl,
+			s.icon,
+			s.page_id pageId,
+			s.admin_flag adminFlag
+		FROM t_system_account_role r LEFT JOIN t_system_role_menu m ON r.role_id = m.role_id
+	       LEFT JOIN t_system_menu s ON m.menu_id = s.menu_id
+	      WHERE r.account_id = #{userId}
+    </select>
+    
+    
+    <select id="getMenu" parameterType="com.luolong.model.Menu" resultType="com.luolong.model.Menu">
+		SELECT
+			menu_id menuId,
+			menu_name menuName,
+			parent_menu_id parentMenuId,
+			menu_code menuCode,
+			menu_url menuUrl,
+			icon,
+			page_id pageId,
+			admin_flag adminFlag
+		FROM t_system_menu
+		<where>
+       	    <if test="menuId != null">
+		         and menu_id = #{menuId}
+		    </if>
+		</where> 
+	
+    </select>
+    
+    <select id="getPage" parameterType="com.luolong.util.dialect.Page" resultType="com.luolong.model.Menu">
+        SELECT
+			t.menu_id menuId,
+			t.menu_name menuName,
+			t.parent_menu_id parentMenuId,
+			CASE WHEN m.menu_name is NULL THEN '无' ELSE  m.menu_name END parentMenuName,
+			t.menu_code menuCode,
+			t.menu_url menuUrl,
+			t.icon,
+			t.page_id pageId,
+			t.admin_flag adminFlag
+		FROM t_system_menu t left join t_system_menu m 
+			on t.parent_menu_id = m.menu_id
+        <where>
+       	    <if test="menu.menuName != null and menu.menuName !=''">
+		         and t.menu_name like concat('%',#{menu.menuName},'%')
+		    </if>
+		</where>
+    </select>
+    
+    <insert id="add" parameterType="com.luolong.model.Menu" useGeneratedKeys="true" keyProperty="menuId">
+      	insert into t_system_menu (menu_name,parent_menu_id,menu_code,menu_url,icon,page_id,admin_flag)
+      		values(#{menuName},#{parentMenuId},#{menuCode},#{menuUrl},#{icon},#{pageId},1)
+    </insert>
+    
+    <update id="edit" parameterType="com.luolong.model.Menu">
+        UPDATE t_system_menu
+		SET 
+		  <if test="menuName != null and menuName != '' ">
+		      menu_name = #{menuName},
+		  </if>
+		  <if test="parentMenuId != null and parentMenuId != '' ">
+		      parent_menu_id = #{parentMenuId},
+		  </if>
+		  <if test="menuCode != null and menuCode != '' ">
+		      menu_code = #{menuCode},
+		  </if>
+		  <if test="menuUrl != null and menuUrl != '' ">
+		      menu_url = #{menuUrl},
+		  </if>
+		  <if test="icon != null and icon != '' ">
+		      icon = #{icon},
+		  </if>
+		  <if test="pageId != null and pageId != '' ">
+		      page_id = #{pageId},
+		  </if>
+		  admin_flag='1'
+		WHERE menu_id = #{menuId}
+    </update>
+    
+</mapper>

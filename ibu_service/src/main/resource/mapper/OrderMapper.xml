@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luolong.dao.OrderDao">
+    
+    <select id="getPage" parameterType="com.luolong.util.dialect.Page" resultType="com.luolong.model.Order">
+        SELECT id,
+        	   order_no orderNo,
+        	   create_date createDate,
+        	   amount
+         FROM t_order
+        <where>
+       	    <if test="order.startTime != null and order.startTime !='' and order.endTime != null and order.endTime != ''">
+		         and create_date between #{order.startTime} and #{order.endTime}
+		    </if>
+		</where>
+    </select>
+    
+</mapper>

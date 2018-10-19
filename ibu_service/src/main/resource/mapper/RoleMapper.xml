@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luolong.dao.RoleDao">
+    
+    <select id="getPage" parameterType="com.luolong.util.dialect.Page" resultType="com.luolong.model.Role">
+        SELECT
+        	role_id roleId,
+        	role_name roleName,
+        	creator
+		FROM t_system_role 
+        <where>
+       	    <if test="role.roleName != null and role.roleName !=''">
+		         and role_name like concat('%',#{role.roleName},'%')
+		    </if>
+		</where>
+    </select>
+    
+    <insert id="add" parameterType="com.luolong.model.Role" useGeneratedKeys="true" keyProperty="roleId">
+      	insert into t_system_role (role_name,creator)
+      		values(#{roleName},#{creator})
+    </insert>
+    
+    <insert id="addRoleMenu" parameterType="com.luolong.model.RoleMenu" useGeneratedKeys="true" keyProperty="roleMenuId">
+      	insert into t_system_role_menu (role_id,menu_id)
+      		values(#{roleId},#{menuId})
+    </insert>
+    
+    <insert id="addRolePermission" parameterType="com.luolong.model.RolePermission" useGeneratedKeys="true" keyProperty="id">
+      	insert into t_system_role_permission (role_id,permission)
+      		values(#{roleId},#{permission})
+    </insert>
+    
+    <select id="getRoleById" parameterType="com.luolong.model.Role" resultType="com.luolong.model.Role">
+    	select 
+    		role_id roleId,
+        	role_name roleName,
+        	creator
+    	from t_system_role
+    	<where>
+       	    <if test="roleId != null">
+		         and role_id =#{roleId}
+		    </if>
+		</where>
+    </select>
+    
+    <select id="getMenuByRole" parameterType="com.luolong.model.Role" resultType="com.luolong.model.RoleMenu">
+    	select 
+    		role_id roleId,
+        	menu_id menuId
+    	from t_system_role_menu  
+    	<where>
+       	    <if test="roleId != null">
+		         and role_id =#{roleId}
+		    </if>
+		</where>
+    </select>
+    
+    <select id="getPermiByRole" parameterType="com.luolong.model.Role" resultType="com.luolong.model.RolePermission">
+    	select 
+    		role_id roleId,
+        	permission 
+    	from t_system_role_permission  
+    	<where>
+       	    <if test="roleId != null">
+		         and role_id =#{roleId}
+		    </if>
+		</where>
+    </select>
+    
+    <select id="getAllRole" resultType="com.luolong.model.Role">
+    	select 
+    		role_id roleId,
+        	role_name roleName,
+        	creator
+    	from t_system_role 
+    </select>
+    
+    <update id="edit" parameterType="com.luolong.model.Role">
+        UPDATE t_system_role
+		SET 
+		  <if test="roleName != null and roleName != '' ">
+		      role_name = #{roleName},
+		  </if>
+		  <if test="creator != null and creator != '' ">
+		      creator = #{creator}
+		  </if>
+		WHERE role_id = #{roleId}
+    </update>
+    
+    <delete id="delRoleMenu" parameterType="com.luolong.model.Role">
+    	delete from t_system_role_menu where role_id = #{roleId}
+    </delete>
+    
+    <delete id="delRolePermission" parameterType="com.luolong.model.Role">
+    	delete from t_system_role_permission where role_id = #{roleId}
+    </delete>
+    
+</mapper>

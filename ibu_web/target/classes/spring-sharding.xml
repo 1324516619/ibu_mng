@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:rdb="http://www.dangdang.com/schema/ddframe/rdb" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.dangdang.com/schema/ddframe/rdb http://www.dangdang.com/schema/ddframe/rdb/rdb.xsd ">
+		
+		
+	<rdb:strategy id="orderDatabaseStrategy" sharding-columns="create_date" algorithm-class="com.luolong.common.util.sharding.OrderDatabaseShardingAlgorithm"/>
+	<rdb:strategy id="orderTableStrategy" sharding-columns="create_date" algorithm-class="com.luolong.common.util.sharding.OrderTableShardingAlgorithm"/>
+	
+    <rdb:data-source id="dataSource">
+        <rdb:sharding-rule default-data-source="db_1" data-sources="db_1,db_2">
+            <rdb:table-rules>
+            	<rdb:table-rule logic-table="t_order" actual-tables="
+            			t_order_201801,t_order_201802,t_order_201803,t_order_201804,t_order_201805,t_order_201806,
+            			t_order_201807,t_order_201808,t_order_201809,t_order_201810,t_order_201811,t_order_201812"
+            			database-strategy="orderDatabaseStrategy" table-strategy="orderTableStrategy"/>
+            </rdb:table-rules>
+            <rdb:default-database-strategy sharding-columns="none" algorithm-class="com.dangdang.ddframe.rdb.sharding.api.strategy.database.NoneDatabaseShardingAlgorithm"/>
+            <rdb:default-table-strategy sharding-columns="none" algorithm-class="com.dangdang.ddframe.rdb.sharding.api.strategy.table.NoneTableShardingAlgorithm"/>
+        </rdb:sharding-rule>
+        <rdb:props>
+            <prop key="metrics.enable">false</prop>
+        </rdb:props>
+    </rdb:data-source>
+    
+</beans>
